@@ -1,0 +1,60 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+#
+# See https://github.com/r-lib/actions/tree/master/examples#readme for
+# additional example workflows available for the R community.
+
+name: R
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        r-version: ['3.6.3', '4.1.1']
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up R ${{ matrix.r-version }}
+        uses: r-lib/actions/setup-r@f57f1301a053485946083d7a45022b278929a78a
+        with:
+          r-version: ${{ matrix.r-version }}
+      - name: Install dependencies
+        run: |
+          install.packages(c("remotes", "rcmdcheck"))
+          remotes::install_deps(dependencies = TRUE)
+        shell: Rscript {0}
+      - name: Check
+        run: rcmdcheck::rcmdcheck(args = "--no-manual", error_on = "error")
+        shell: Rscript {0}
+            - name: Cache
+  uses: actions/cache@v4.0.2
+  with:
+    # A list of files, directories, and wildcard patterns to cache and restore
+    path: 
+    # An explicit key for restoring and saving the cache
+    key: 
+    # An ordered list of keys to use for restoring stale cache if no cache hit occurred for key. Note `cache-hit` returns false in this case.
+    restore-keys: # optional
+    # The chunk size used to split up large files during upload, in bytes
+    upload-chunk-size: # optional
+    # An optional boolean when enabled, allows windows runners to save or restore caches that can be restored or saved respectively on other platforms
+    enableCrossOsArchive: # optional, default is false
+    # Fail the workflow if cache entry is not found
+    fail-on-cache-miss: # optional, default is false
+    # Check if a cache entry exists for the given input(s) (key, restore-keys) without downloading the cache
+    lookup-only: # optional, default is false
+    # Run the post step to save the cache even if another step before fails
+    save-always: # optional, default is false
+          
